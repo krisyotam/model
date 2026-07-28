@@ -37,9 +37,10 @@ read Markdown, so the format is Markdown.
 | `hosts.md` | Every machine: IPs, SSH command, sudo, what runs there |
 | `subagents.md` | How to invoke every other agent CLI headlessly |
 | `models.env` | Shared env, sectioned per agent, `chmod 600` |
+| `models.md` | Slug index: one canonical id per model, across every vendor |
 | `log.csv` | Session log every agent appends to |
 
-Templates for all five are in [`template/`](template/). Copy them, fill them
+Templates for all six are in [`template/`](template/). Copy them, fill them
 with your own facts, and never commit the result.
 
 ## The session log
@@ -47,16 +48,36 @@ with your own facts, and never commit the result.
 One CSV, every agent, one row per session, appended when the session ends:
 
 ```
-date,company,model,description,resume
-2026-07-28,anthropic,fable 5,added the session log to the standard,claude --resume 9cbb2d13-ef46-450b-a999-a4aeb82aff82
-2026-07-28,xai,grok-4.5,swept the quant repo for dead code,grok --resume 41c9
+date,company,model,effort,description,prompt,resume
+2026-07-28,anthropic,claude-fable-5,high,added the session log,~/.prompt/prompt/model-log.html,claude --resume 9cbb2d13-...
+2026-07-28,xai,xai-grok-4.5,none,swept the quant repo for dead code,,grok --resume 41c9
 ```
 
 CSV rather than Markdown so one table serves every agent and you can still
 filter it: `grep -i ',anthropic,' ~/.model/log.csv` or
-`awk -F, '$3=="fable 5"'`. The `resume` column is whatever that CLI needs to
-pick the session back up, so one row is enough to get back into any past
-session from any agent.
+`awk -F, '$3=="claude-fable-5"'`. `model` is a slug from `models.md`, never a
+marketing name, so the column is filterable. `prompt` points into
+[`~/.prompt/`](https://github.com/krisyotam/prompt), the sibling standard
+that holds the prompt/loop/graph artifacts. `resume` is whatever that CLI
+needs to pick the session back up, so one row is enough to get back into any
+past session from any agent.
+
+## The slug index
+
+`models.md` is the registry of model slugs. Format:
+
+```
+<vendor-prefix>-<vendor's own model id>
+```
+
+`claude-fable-5`, `cursor-composer-2.5`, `openai-gpt-5-6-sol`,
+`deepseek-v4`. Lowercase, hyphens, no spaces. Where the vendor's own id
+already carries the prefix (Anthropic ships `claude-*`) the slug is the id
+unchanged.
+
+**An agent using a model that is not in `models.md` mints the slug and adds
+the row on that model's first use, before writing its log row.** The index is
+append-only in practice; retired models stay so old log rows still resolve.
 
 ## Adding a primitive
 
