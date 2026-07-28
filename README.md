@@ -16,7 +16,7 @@ it can shell out to the others.
 2. Every agent's system file gets **exactly one line** pointing at it:
 
    ```
-   Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.model/`. Read `~/.model/README.md` on launch.
+   Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.model/`. Read `~/.model/README.md` on launch and append a row to `~/.model/log.csv` when the session ends.
    ```
 
    Append it to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`,
@@ -37,9 +37,26 @@ read Markdown, so the format is Markdown.
 | `hosts.md` | Every machine: IPs, SSH command, sudo, what runs there |
 | `subagents.md` | How to invoke every other agent CLI headlessly |
 | `models.env` | Shared env, sectioned per agent, `chmod 600` |
+| `log.csv` | Session log every agent appends to |
 
-Templates for all four are in [`template/`](template/). Copy them, fill them
+Templates for all five are in [`template/`](template/). Copy them, fill them
 with your own facts, and never commit the result.
+
+## The session log
+
+One CSV, every agent, one row per session, appended when the session ends:
+
+```
+date,company,model,description,resume
+2026-07-28,anthropic,fable 5,added the session log to the standard,claude --resume 9cbb2d13-ef46-450b-a999-a4aeb82aff82
+2026-07-28,xai,grok-4.5,swept the quant repo for dead code,grok --resume 41c9
+```
+
+CSV rather than Markdown so one table serves every agent and you can still
+filter it: `grep -i ',anthropic,' ~/.model/log.csv` or
+`awk -F, '$3=="fable 5"'`. The `resume` column is whatever that CLI needs to
+pick the session back up, so one row is enough to get back into any past
+session from any agent.
 
 ## Adding a primitive
 
@@ -79,7 +96,7 @@ cp template/* ~/.model/
 mv ~/.model/models.env.example ~/.model/models.env
 chmod 600 ~/.model/models.env
 
-LINE='Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.model/`. Read `~/.model/README.md` on launch.'
+LINE='Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.model/`. Read `~/.model/README.md` on launch and append a row to `~/.model/log.csv` when the session ends.'
 for f in ~/.claude/CLAUDE.md ~/.codex/AGENTS.md ~/.gemini/GEMINI.md \
          ~/.grok/AGENTS.md ~/.config/opencode/AGENTS.md; do
   mkdir -p "$(dirname "$f")"
