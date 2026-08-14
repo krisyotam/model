@@ -5,9 +5,10 @@ tooling. Any agent reads what it needs from here instead of asking again.
 
 Config lives in `$XDG_CONFIG_HOME/model/` (default `~/.config/model/`).
 The session log lives in `$XDG_STATE_HOME/model/log.csv` (default
-`~/.local/state/model/log.csv`). Each agent's own system file
-(`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, ...) gets exactly one line
-pointing here. Nothing else duplicates this content.
+`~/.local/state/model/log.csv`). Each agent's `AGENTS.md` or `SOUL.md`
+(or `CLAUDE.md`, `GEMINI.md`) gets exactly one line pointing here.
+That line is how the agent finds this directory. Nothing else
+duplicates this content.
 
 ## Files
 

@@ -24,17 +24,22 @@ it can shell out to the others.
    exist and `~/.model/` does, read `~/.model/` (the pre-XDG location). New
    installs never create `~/.model/`.
 
-2. Every agent's system file gets **exactly one line** pointing at it. Use the
-   resolved paths, not the `$XDG_*` variables; most agents will not expand
-   those. On a default layout:
+2. An agent recognizes this standard by **exactly one line** in its
+   `AGENTS.md` or `SOUL.md` (or the vendor name for that file: `CLAUDE.md`,
+   `GEMINI.md`). Use the resolved paths, not the `$XDG_*` variables; most
+   agents will not expand those. On a default layout:
 
    ```
    Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.config/model/`. Read `~/.config/model/README.md` on launch and append a row to `~/.local/state/model/log.csv` when the session ends.
    ```
 
+   That line is the whole contract. Nothing else from this directory is
+   copied into the agent file.
+
    Append it to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`,
    `~/.gemini/GEMINI.md`, `~/.grok/AGENTS.md`,
-   `~/.config/opencode/AGENTS.md`, and any other agent's global instructions.
+   `~/.config/opencode/AGENTS.md`, `~/.hermes/SOUL.md`,
+   and any other agent's global instructions.
 
 3. Facts live in the config dir once. If a fact is duplicated in an agent's
    system file, move it into `~/.config/model/` and leave the pointer.
@@ -146,7 +151,7 @@ config_disp="${MODEL_CONFIG/#$HOME/~}"
 state_disp="${MODEL_STATE/#$HOME/~}"
 LINE="Shared primitives (hosts/SSH, subagent CLIs, models.env) live in \`${config_disp}/\`. Read \`${config_disp}/README.md\` on launch and append a row to \`${state_disp}/log.csv\` when the session ends."
 for f in ~/.claude/CLAUDE.md ~/.codex/AGENTS.md ~/.gemini/GEMINI.md \
-         ~/.grok/AGENTS.md ~/.config/opencode/AGENTS.md; do
+         ~/.grok/AGENTS.md ~/.config/opencode/AGENTS.md ~/.hermes/SOUL.md; do
   mkdir -p "$(dirname "$f")"
   grep -qF "$config_disp/" "$f" 2>/dev/null || printf '\n%s\n' "$LINE" >> "$f"
 done
@@ -171,7 +176,7 @@ state_disp="${XDG_STATE_HOME/#$HOME/~}/model"
 OLD='Shared primitives (hosts/SSH, subagent CLIs, models.env) live in `~/.model/`.'
 NEW="Shared primitives (hosts/SSH, subagent CLIs, models.env) live in \`${config_disp}/\`. Read \`${config_disp}/README.md\` on launch and append a row to \`${state_disp}/log.csv\` when the session ends."
 for f in ~/.claude/CLAUDE.md ~/.codex/AGENTS.md ~/.gemini/GEMINI.md \
-         ~/.grok/AGENTS.md ~/.config/opencode/AGENTS.md; do
+         ~/.grok/AGENTS.md ~/.config/opencode/AGENTS.md ~/.hermes/SOUL.md; do
   [ -f "$f" ] || continue
   if grep -qF '~/.model/' "$f" 2>/dev/null; then
     # replace the old one-liner; leave any other mention alone
