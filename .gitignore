@@ -1,2 +1,3 @@
 models.env
 /log.csv
+# log.csv is state ($XDG_STATE_HOME/model/), never config
